@@ -51,11 +51,15 @@ jobs:
       shell: powershell
       working-directory: ${{ github.workspace }}
 
+    - name: Verify Release Folder Contents
+      run: dir bin\Release
+      shell: powershell
+
     - name: Verify JSON Files Exist
       run: |
         dir RouteList_Data.json
-        dir StopList_Data.json
-        dir RouteStopList_Data.json
+        dir bin\Release\StopList_Data.json
+        dir bin\Release\RouteStopList_Data.json
       shell: powershell
       working-directory: ${{ github.workspace }}
 
