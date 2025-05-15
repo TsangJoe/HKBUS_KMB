@@ -57,7 +57,6 @@ jobs:
 
     - name: Verify JSON Files Exist
       run: |
-        dir RouteList_Data.json
         dir bin\Release\StopList_Data.json
         dir bin\Release\RouteStopList_Data.json
       shell: powershell
