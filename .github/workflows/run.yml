@@ -17,7 +17,7 @@ jobs:
     - name: Download Executable
       uses: actions/download-artifact@v2
       with:
-        name: executable
+        name: hkbus-executable  # 確保這裡的名稱與上傳時的名稱一致
 
     - name: Run Console Application
       run: .\HK_BUS.exe

@@ -33,5 +33,5 @@ jobs:
     - name: Upload Executable
       uses: actions/upload-artifact@v2
       with:
-        name: executable
+        name: hkbus-executable  # 確保這裡的名稱是唯一的
         path: bin\Release\HK_BUS.exe
