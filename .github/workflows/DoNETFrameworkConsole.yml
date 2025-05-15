@@ -28,7 +28,7 @@ jobs:
       
     - name: Verify Executable Exists
       run: dir bin\Release\HKBUS.exe
-      shell: cmd
+      shell: powershell
 
     - name: Run Console Application
       run: .\bin\Release\HKBUS.exe
