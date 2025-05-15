@@ -26,12 +26,13 @@ jobs:
     - name: Build Solution
       run: msbuild HKBUS_KMB.sln /p:Configuration=Release /p:OutputPath=bin\Release
 
-    - name: Verify Executable Exists
-      run: dir bin\Release\HK_BUS.exe
+    - name: Verify Release Folder Contents
+      run: dir bin\Release
       shell: powershell
 
-    - name: Upload Executable as Artifact
+    - name: Upload Release Folder as Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: hk-bus-executable
-        path: bin\Release\HK_BUS.exe
+        name: hk-bus-release
+        path: bin\Release\
+        retention-days: 7  # Artifact 保留 7 天

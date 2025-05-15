@@ -2,25 +2,32 @@ name: Run .NET Framework Console App
 
 on:
   workflow_run:
-    workflows: ["Build .NET Framework Console App"] # 引用 build.yml 的工作流程名稱
+    workflows: ["Build .NET Framework Console App"]
     branches: [ main ]
     types:
       - completed
+  schedule:
+    - cron: '0 0 * * *'  # 每天 UTC 00:00 執行（香港時間 08:00）
+  workflow_dispatch:  # 支援手動觸發
 
 jobs:
   run:
     runs-on: windows-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }} # 僅在 build.yml 成功時運行
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name != 'workflow_run' }}
 
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Download Executable Artifact
+    - name: Download Release Folder Artifact
       uses: actions/download-artifact@v4
       with:
-        name: hk-bus-executable
+        name: hk-bus-release
         path: bin\Release
+
+    - name: Verify Release Folder Contents
+      run: dir bin\Release
+      shell: powershell
 
     - name: Run Console Application
       run: .\bin\Release\HK_BUS.exe
@@ -46,6 +53,13 @@ jobs:
       working-directory: ${{ github.workspace }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Generate Raw GitHub URLs for JSON Files
+      run: |
+        echo "RouteList_Data.json URL: https://raw.githubusercontent.com/${{ github.repository }}/main/RouteList_Data.json"
+        echo "StopList_Data.json URL: https://raw.githubusercontent.com/${{ github.repository }}/main/StopList_Data.json"
+        echo "RouteStopList_Data.json URL: https://raw.githubusercontent.com/${{ github.repository }}/main/RouteStopList_Data.json"
+      shell: powershell
 
     - name: Create GitHub Release
       id: create_release
