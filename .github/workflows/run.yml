@@ -20,7 +20,7 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: hk-bus-executable
-        path: bin\Release
+        path: bin\Release\
 
     - name: Run Console Application
       run: .\bin\Release\HK_BUS.exe
