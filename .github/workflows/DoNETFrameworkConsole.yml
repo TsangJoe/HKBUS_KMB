@@ -24,7 +24,13 @@ jobs:
       run: nuget restore HKBUS_KMB.sln
 
     - name: Build Solution
-      run: msbuild HKBUS_KMB.sln /p:Configuration=Release
+      run: msbuild HKBUS_KMB.sln /p:Configuration=Release /p:OutputPath=bin\Release
+
+    - name: Verify Executable Exists
+      run: dir bin\Release\net8.0\HKBUS_KMB.exe
+      shell: cmd
 
     - name: Run Console Application
-      run: bin\Release\HKBUS_KMB.exe
+      run: .\bin\Release\HKBUS_KMB.exe
+      shell: powershell
+      working-directory: ${{ github.workspace }}
