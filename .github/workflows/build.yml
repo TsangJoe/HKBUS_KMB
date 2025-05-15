@@ -30,8 +30,12 @@ jobs:
       run: dir bin\Release\HK_BUS.exe
       shell: powershell
 
-    - name: Upload Executable as Artifact
+    - name: Compress Release Folder
+      run: |
+        Compress-Archive -Path bin\Release\* -DestinationPath bin\Release.zip
+
+    - name: Upload Release Folder as Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: hk-bus-executable
-        path: bin\Release\
+        name: hk-bus-release
+        path: bin\Release.zip
