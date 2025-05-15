@@ -2,25 +2,49 @@ name: Run .NET Framework Console App
 
 on:
   workflow_run:
-    workflows: ["Build .NET Framework Console App"] # 引用 build.yml 的工作流程名稱
+    workflows: ["Build .NET Framework Console App"]
     branches: [ main ]
     types:
       - completed
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
 
 jobs:
   run:
     runs-on: windows-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }} # 僅在 build.yml 成功時運行
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name != 'workflow_run' }}
 
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Download Executable Artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: hk-bus-executable
-        path: bin\Release
+    - name: Read Artifact ID
+      id: read-artifact-id
+      run: |
+        $artifactId = Get-Content -Path artifact-id.txt
+        echo "artifact_id=$artifactId" >> $env:GITHUB_OUTPUT
+      shell: powershell
+
+    - name: Download Artifact via API
+      run: |
+        $artifactId = "${{ steps.read-artifact-id.outputs.artifact_id }}"
+        $headers = @{
+          "Authorization" = "Bearer ${{ secrets.GITHUB_TOKEN }}"
+          "Accept" = "application/vnd.github+json"
+        }
+        $url = "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/$artifactId/zip"
+        Invoke-WebRequest -Uri $url -Headers $headers -OutFile hk-bus-release.zip
+      shell: powershell
+
+    - name: Unzip Artifact
+      run: |
+        Expand-Archive -Path hk-bus-release.zip -DestinationPath bin\Release
+      shell: powershell
+
+    - name: Verify Release Folder Contents
+      run: dir bin\Release
+      shell: powershell
 
     - name: Run Console Application
       run: .\bin\Release\HK_BUS.exe
@@ -46,6 +70,13 @@ jobs:
       working-directory: ${{ github.workspace }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Generate Raw GitHub URLs for JSON Files
+      run: |
+        echo "RouteList_Data.json URL: https://raw.githubusercontent.com/${{ github.repository }}/main/RouteList_Data.json"
+        echo "StopList_Data.json URL: https://raw.githubusercontent.com/${{ github.repository }}/main/StopList_Data.json"
+        echo "RouteStopList_Data.json URL: https://raw.githubusercontent.com/${{ github.repository }}/main/RouteStopList_Data.json"
+      shell: powershell
 
     - name: Create GitHub Release
       id: create_release

@@ -26,12 +26,32 @@ jobs:
     - name: Build Solution
       run: msbuild HKBUS_KMB.sln /p:Configuration=Release /p:OutputPath=bin\Release
 
-    - name: Verify Executable Exists
-      run: dir bin\Release\HK_BUS.exe
+    - name: Verify Release Folder Contents
+      run: dir bin\Release
       shell: powershell
 
-    - name: Upload Executable as Artifact
+    - name: Upload Release Folder as Artifact
+      id: upload-artifact
       uses: actions/upload-artifact@v4
       with:
-        name: hk-bus-executable
-        path: bin\Release\HK_BUS.exe
+        name: hk-bus-release
+        path: bin\Release\
+        retention-days: 7
+
+    - name: Get Artifact ID
+      run: |
+        echo "Artifact ID: ${{ steps.upload-artifact.outputs.artifact-id }}"
+        echo "artifact_id=${{ steps.upload-artifact.outputs.artifact-id }}" >> $GITHUB_ENV
+      shell: powershell
+
+    - name: Save Artifact ID to File
+      run: |
+        echo ${{ steps.upload-artifact.outputs.artifact-id }} > artifact-id.txt
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add artifact-id.txt
+        git commit -m "Save artifact ID for hk-bus-release"
+        git push
+      shell: powershell
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
