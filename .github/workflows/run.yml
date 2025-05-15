@@ -1,0 +1,34 @@
+name: Run .NET Framework Console App
+
+on:
+  workflow_run:
+    workflows: ["Build .NET Framework Console App"]
+    types:
+      - completed
+
+jobs:
+  run:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Download Executable
+      uses: actions/download-artifact@v2
+      with:
+        name: executable
+
+    - name: Run Console Application
+      run: .\HK_BUS.exe
+      shell: powershell
+      working-directory: ${{ github.workspace }}
+
+    - name: Upload Generated Files
+      uses: actions/upload-artifact@v2
+      with:
+        name: generated-files
+        path: |
+          RouteList_Data.json
+          StopList_Data.json
+          RouteStopList_Data.json

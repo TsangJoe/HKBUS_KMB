@@ -1,4 +1,4 @@
-name: Build and Run .NET Framework Console App
+name: Build .NET Framework Console App
 
 on:
   push:
@@ -25,12 +25,13 @@ jobs:
 
     - name: Build Solution
       run: msbuild HKBUS_KMB.sln /p:Configuration=Release /p:OutputPath=bin\Release
-      
+
     - name: Verify Executable Exists
       run: dir bin\Release\HK_BUS.exe
       shell: powershell
 
-    - name: Run Console Application
-      run: .\bin\Release\HK_BUS.exe
-      shell: powershell
-      working-directory: ${{ github.workspace }}
+    - name: Upload Executable
+      uses: actions/upload-artifact@v2
+      with:
+        name: executable
+        path: bin\Release\HK_BUS.exe
