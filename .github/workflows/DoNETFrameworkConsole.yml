@@ -24,7 +24,7 @@ jobs:
       run: nuget restore HKBUS_KMB.sln
 
     - name: Build Solution
-      run: msbuild HKBUS_KMB.sln /p:Configuration=Release /p:OutputPath=bin\Release
+      run: msbuild HKBUS_KMB.sln /p:Configuration=Release /p:OutputPath=bin\Release /v:diag
 
     - name: Verify Executable Exists
       run: dir bin\Release\HKBUS_KMB.exe
