@@ -1,15 +1,16 @@
 name: Run .NET Framework Console App
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Build .NET Framework Console App"] # 引用 build.yml 的工作流程名稱
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    types:
+      - completed
 
 jobs:
   run:
     runs-on: windows-latest
-    needs: build # 依賴 Build 工作流程
+    if: ${{ github.event.workflow_run.conclusion == 'success' }} # 僅在 build.yml 成功時運行
 
     steps:
     - name: Checkout Code
