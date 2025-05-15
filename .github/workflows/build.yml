@@ -34,4 +34,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: hk-bus-executable
-        path: bin\Release\HK_BUS.exe
+        path: bin\Release\
