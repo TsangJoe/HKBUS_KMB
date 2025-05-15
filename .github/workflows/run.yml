@@ -11,11 +11,79 @@ jobs:
   run:
     runs-on: windows-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }} # 僅在 build.yml 成功時運行
-  -name: Download Release Artifact
-  uses: actions/download-artifact@v4
-  with:
-    name: hk-bus-release
-    path: ./Release
 
--name: Extract Release Artifact
-run: Expand-Archive -Path ./Release/hk-bus-release.zip -DestinationPath ./Release
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Download Executable Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: hk-bus-executable
+        path: bin\Release
+
+    - name: Run Console Application
+      run: .\bin\Release\HK_BUS.exe
+      shell: powershell
+      working-directory: ${{ github.workspace }}
+
+    - name: Verify JSON Files Exist
+      run: |
+        dir RouteList_Data.json
+        dir StopList_Data.json
+        dir RouteStopList_Data.json
+      shell: powershell
+      working-directory: ${{ github.workspace }}
+
+    - name: Commit and Push JSON Files to Repository
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add RouteList_Data.json StopList_Data.json RouteStopList_Data.json
+        git commit -m "Add generated JSON files from HK_BUS.exe"
+        git push
+      shell: powershell
+      working-directory: ${{ github.workspace }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ github.run_number }}
+        release_name: Release ${{ github.run_number }}
+        draft: false
+        prerelease: false
+
+    - name: Upload JSON Files to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./RouteList_Data.json
+        asset_name: RouteList_Data.json
+        asset_content_type: application/json
+
+    - name: Upload StopList JSON to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./StopList_Data.json
+        asset_name: StopList_Data.json
+        asset_content_type: application/json
+
+    - name: Upload RouteStopList JSON to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./RouteStopList_Data.json
+        asset_name: RouteStopList_Data.json
+        asset_content_type: application/json
