@@ -1,0 +1,36 @@
+name: Build and Run .NET Framework Console App Net8.0
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Setup NuGet
+      uses: nuget/setup-nuget@v2
+
+    - name: Restore NuGet Packages
+      run: nuget restore HKBUS_KMB.sln
+
+    - name: Build Solution
+      run: msbuild HKBUS_KMB.sln /p:Configuration=Release /p:OutputPath=bin\Release
+
+    - name: Verify Executable Exists
+      run: dir bin\Release\net8.0\HKBUS_KMB.exe
+      shell: cmd
+
+    - name: Run Console Application
+      run: .\bin\Release\net8.0\HKBUS_KMB.exe
+      shell: powershell
+      working-directory: ${{ github.workspace }}
