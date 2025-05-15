@@ -1,0 +1,27 @@
+name: .NET Framework Console App Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: windows-latest  # 使用 Windows 環境
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.0.0
+
+    - name: Restore NuGet packages
+      run: nuget restore HKBUS_KMB.sln  # 替換為你的控制台專案名稱
+
+    - name: Build solution
+      run: msbuild HKBUS_KMB.sln /p:Configuration=Release  # 替換為你的控制台專案名稱
+
+    - name: Run application
+      run: .\bin\Release\net8.0\HK_BUS.exe  # 替換為你的可執行文件路徑
